@@ -48,7 +48,11 @@ export default function Index() {
         Alert.alert("Success", "Login successful!");
         console.log(response.data.data.fname, 'MY Name')
         const accessToken = response.data.data.accessToken
+        const userName = `${response.data.data.fname} ${response.data.data.lname}`
+        const role = response.data.data.role
         await AsyncStorage.setItem("accessToken", accessToken)
+        await AsyncStorage.setItem("username", userName)
+        await AsyncStorage.setItem("role", role)
         console.log('Token has been set')
 
         // Redirect to Home Screen

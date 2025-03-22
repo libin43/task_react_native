@@ -5,6 +5,7 @@ import { Button } from "react-native-paper";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
 import axios from "axios";
+import CustomHeader from "@/components/Header/CustomHeader";
 
 type Task = {
     _id: string;
@@ -71,6 +72,7 @@ const HomeScreen = () => {
 
     return (
         <PaperProvider>
+               <CustomHeader title="Cave Digital" />
             <View style={styles.container}>
                 <Text style={styles.title}>Tasks</Text>
 
