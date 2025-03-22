@@ -97,7 +97,7 @@ const TaskDetailScreen = () => {
       );
 
       Alert.alert("Success", "Task deleted successfully!");
-      router.replace("/home");
+      router.replace("/tasks");
     } catch (error) {
       console.error("Error deleting task:", error);
       Alert.alert("Error", "Failed to delete task.");

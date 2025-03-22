@@ -6,6 +6,16 @@ export default function RootLayout() {
         <Stack>
             <Stack.Screen name="index" options={{ headerShown: false }} />
             <Stack.Screen name="profile/index" options={{ title: "Profile" }} />
+            <Stack.Screen name="tasks/index"
+                options={{
+                    title: "Tasks",
+                    headerRight: () => (
+                        <Link href={'/profile'} asChild>
+                            <Button>Profile</Button>
+                        </Link>
+                    )
+                }}
+            />
             <Stack.Screen name="tasks/create"
                 options={{
                     title: "Create Task",

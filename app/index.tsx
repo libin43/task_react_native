@@ -56,7 +56,7 @@ export default function Index() {
         console.log('Token has been set')
 
         // Redirect to Home Screen
-        router.replace("/home");
+        router.replace("/tasks");
 
       }
       console.log("Login Response:", response.data);
