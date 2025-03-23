@@ -1,7 +1,6 @@
 import { SIGNUP_API } from "@/api/signup";
 import { CustomButton } from "@/components/Button/CustomButton";
 import { handleApiError } from "@/utils/errorHandler";
-import axios from "axios";
 import { router } from "expo-router";
 import React, { useState } from "react";
 import { View, StyleSheet, ScrollView, Alert, KeyboardAvoidingView, Platform, Text, ImageBackground } from "react-native";
@@ -67,9 +66,7 @@ export default function SignupScreen() {
             router.replace("/");
             Alert.alert("Success", "Signup successful!");
         } catch (error) {
-            if (axios.isAxiosError(error)) {
                 handleApiError(error)
-            }
         } finally {
             setLoading(false);
         }

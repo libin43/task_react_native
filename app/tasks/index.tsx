@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { View, StyleSheet, FlatList, Alert, TouchableOpacity, RefreshControl } from "react-native";
-import { Text, Provider as PaperProvider, Card, Title, Button, useTheme, IconButton, Divider, Badge, ActivityIndicator } from "react-native-paper";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { View, StyleSheet, FlatList, RefreshControl } from "react-native";
+import { Text, Provider as PaperProvider, Card, Title, Button, useTheme, IconButton, ActivityIndicator } from "react-native-paper";
 import { router } from "expo-router";
-import axios from "axios";
 import { GET_ALL_TASKS_API } from "@/api/getAllTasks";
+import { handleApiError } from "@/utils/errorHandler";
 
 type Task = {
     _id: string;
@@ -32,21 +31,7 @@ const HomeScreen = () => {
                 setTasks(response.data.data);
             }
         } catch (error) {
-            Alert.alert("Error", "Failed to load tasks. Please try again.");
-            if (axios.isAxiosError(error)) {
-                console.log(error, 'its an error')
-                console.log(error.response, 'error response');
-                const errorCode = error.response?.data.errorCode; // Extract the error code
-                const errorMessage = error.response?.data.message || "Signup failed."; // Extract the error message
-
-                // let userFriendlyMessage = "An error occurred. Please try again."; // Default message
-
-                // console.log(userFriendlyMessage, "friendly message");
-                await AsyncStorage.multiRemove(["fname", "lname", "mobile", "email", "role", "accessToken", "username"]);
-                router.replace('/')
-                Alert.alert("Error", errorMessage);
-            }
-            console.error("Task Loading Error:", error);
+            handleApiError(error)
         } finally {
             setLoading(false);
         }
@@ -66,7 +51,7 @@ const HomeScreen = () => {
             </View>
             <IconButton
                 icon="refresh"
-                // mode="contained"
+                mode="contained"
                 size={20}
                 onPress={fetchTasks}
                 iconColor={theme.colors.onPrimary}
@@ -132,11 +117,6 @@ const HomeScreen = () => {
                     />
                 ) : (
                     <View style={styles.emptyContainer}>
-                        {/* <IconButton
-              icon="clipboard-text-outline"
-              size={60}
-              iconColor={theme.colors.onSurfaceVariant}
-            /> */}
                         <Text style={[styles.emptyText, { color: theme.colors.onSurface }]}>No tasks yet</Text>
                         <Text style={{ color: theme.colors.onSurfaceVariant, textAlign: 'center' }}>
                             Create a task to get started with your productivity journey

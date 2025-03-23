@@ -1,15 +1,14 @@
 import React, { useState, useEffect, useContext } from "react";
 import { View, StyleSheet, Alert, Keyboard, ImageBackground, KeyboardAvoidingView, Platform, ScrollView } from "react-native";
-import { TextInput, Button, Text, Provider as PaperProvider, Surface, Avatar, Headline, Caption, useTheme } from "react-native-paper";
-import axios from "axios";
+import { TextInput, Text, Provider as PaperProvider, Surface, Avatar, Headline, Caption, useTheme } from "react-native-paper";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Link, router } from "expo-router";
+import { router } from "expo-router";
 import { SIGNIN_API } from "@/api/signin";
 import { CustomButton } from "@/components/Button/CustomButton";
-import { UserContext, UserContextType } from "@/context/userContext";
+import { UserContext } from "@/context/userContext";
+import { handleApiError } from "@/utils/errorHandler";
 
 export default function Index() {
-  // State for email and password
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -18,11 +17,6 @@ export default function Index() {
 
 
   const userContext = useContext(UserContext)
-  console.log(userContext, 'us')
-
-  // if(us){
-  //   const {} = us
-  // }
 
   useEffect(() => {
     checkLoginStatus();
@@ -50,7 +44,6 @@ export default function Index() {
       // Handle successful login
       if (response.data) {
         Alert.alert("Success", "Login successful!");
-        console.log(response.data.data.fname, 'MY Name');
         const accessToken = response.data.data.accessToken;
         const fName = response.data.data.fname;
         const lName = response.data.data.lname
@@ -58,21 +51,15 @@ export default function Index() {
         const userName = `${fName} ${lName}`
         await AsyncStorage.setItem("accessToken", accessToken);
         if(userContext){
-          console.log('setting........', fName, role)
           userContext.setUser(fName, lName, role)
         }
         await AsyncStorage.setItem("username", userName);
         await AsyncStorage.setItem("role", role);
-        console.log('Token has been set');
-
         // Redirect to Tasks Screen
         router.replace("/tasks");
       }
-      console.log("Login Response:", response.data);
     } catch (error) {
-      // Handle login error
-      Alert.alert("Error", "Login failed. Please check your credentials.");
-      // console.error("Login Error:", error);
+        handleApiError(error)
     } finally {
       setLoading(false);
     }

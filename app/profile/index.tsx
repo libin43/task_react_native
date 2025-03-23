@@ -45,10 +45,6 @@ const ProfileScreen = () => {
     try {
       // Clear all user-related data from Async Storage
       await AsyncStorage.multiRemove([
-        "fname", 
-        "lname", 
-        "mobile", 
-        "email", 
         "role", 
         "accessToken", 
         "username"

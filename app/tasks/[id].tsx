@@ -16,6 +16,7 @@ import { GET_TASK_BY_ID_API } from "@/api/getTaskById";
 import { UPDATE_TASK_API } from "@/api/updateTask";
 import { DELETE_TASK_API } from "@/api/deleteTask";
 import { validateDescription, validateTitle } from "@/utils/validation";
+import { handleApiError } from "@/utils/errorHandler";
 
 const TaskDetailScreen = () => {
   const theme = useTheme();
@@ -29,36 +30,6 @@ const TaskDetailScreen = () => {
   const [descriptionError, setDescriptionError] = useState("")
 
 
-
-  // const validateTitle = (value: string) => {
-  //   const trimmedValue = value.trim();
-
-  //   if (trimmedValue.length === 0) {
-  //     setTitleError("Title is required");
-  //     return;
-  //   }
-
-  //   if (trimmedValue.length > 30) {
-  //     setTitleError("Title should be at most 30 characters");
-  //     return;
-  //   }
-
-  //   setTitleError(""); // Clear error if valid
-  //   return;
-  // };
-
-  // const validateDescription = (value: string) => {
-  //   const trimmedValue = value.trim();
-
-  //   if (trimmedValue.length > 100) {
-  //     setDescriptionError("Description should be at most 100 characters");
-  //     return;
-  //   }
-
-  //   setDescriptionError(""); // Clear error if valid
-  //   return;
-  // }
-
   const handleTitleChange = (value: string) => {
     setUpdatedTitle(value);
     setTitleError(validateTitle(value))
@@ -70,25 +41,14 @@ const TaskDetailScreen = () => {
   }
 
   const fetchTask = async () => {
-    const token = await AsyncStorage.getItem("accessToken");
-    if (!token) {
-      Alert.alert("Authentication Error", "No access token found. Please log in.");
-      return;
-    }
-
     setLoading(true);
-    
     try {
-
-
       const response = await GET_TASK_BY_ID_API(id)
-
       setTask(response.data.data);
       setUpdatedTitle(response.data.data.title);
       setUpdatedDescription(response.data.data.description);
     } catch (error) {
-      console.error("Error fetching task:", error);
-      Alert.alert("Error", "Failed to fetch task details.");
+      handleApiError(error)
     } finally {
       setLoading(false);
     }
@@ -102,29 +62,16 @@ const TaskDetailScreen = () => {
   // Handle task update
   const handleUpdate = async () => {
     try {
-      if (!updatedTitle.trim()) {
-        Alert.alert("Validation Error", "Task title cannot be empty");
-        return;
-      }
-
-      const token = await AsyncStorage.getItem("accessToken");
-      if (!token) {
-        Alert.alert("Authentication Error", "No access token found. Please log in.");
-        return;
-      }
-
       setLoading(true);
 
       const update = await UPDATE_TASK_API(id, updatedTitle, updatedDescription)
-
       if (update.data.success) {
         setIsEditing(false);
         fetchTask();
         Alert.alert("Success", "Task updated successfully!");
       }
     } catch (error) {
-      console.error("Error updating task:", error);
-      Alert.alert("Error", "Failed to update task.");
+      handleApiError(error)
     } finally {
       setLoading(false);
     }
@@ -139,7 +86,6 @@ const TaskDetailScreen = () => {
         { text: "Cancel" },
         { text: "Delete", onPress: handleDelete, style: "destructive" }
       ],
-      // { cancelable: true }
     );
   };
 
@@ -152,8 +98,7 @@ const TaskDetailScreen = () => {
       Alert.alert("Success", "Task deleted successfully!");
       router.replace("/tasks");
     } catch (error) {
-      console.error("Error deleting task:", error);
-      Alert.alert("Error", "Failed to delete task.");
+      handleApiError(error)
     } finally{
       setLoading(false);
     }
@@ -257,25 +202,9 @@ const TaskDetailScreen = () => {
 };
 
 const styles = StyleSheet.create({
-  // container: {
-  //   flex: 1,
-  //   backgroundColor: "#f5f5f5",
-  // },
-  // scrollContainer: {
-  //   padding: 16,
-  // },
   taskContainer: {
     padding: 15
   },
-  // card: {
-  //   marginBottom: 25,
-  //   borderRadius: 20,
-  // },
-  // dateText: {
-  //   fontSize: 12,
-  //   marginBottom: 8,
-  //   color: "#666",
-  // },
   taskTitle: {
     fontSize: 24,
     fontWeight: "bold",
@@ -320,11 +249,6 @@ const styles = StyleSheet.create({
     flex: 1,
     marginLeft: 8,
   },
-  // cardActions: {
-  //   justifyContent: "space-between",
-  //   paddingHorizontal: 16,
-  //   paddingBottom: 16,
-  // },
   editButton: {
     flex: 1,
     marginRight: 8,

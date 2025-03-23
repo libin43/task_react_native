@@ -1,7 +1,6 @@
 import { CREATE_TASK_API } from "@/api/createTask";
+import { handleApiError } from "@/utils/errorHandler";
 import { validateDescription, validateTitle } from "@/utils/validation";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import axios, { AxiosError } from "axios";
 import { router } from "expo-router";
 import { useState } from "react";
 import { View, StyleSheet, Alert } from "react-native";
@@ -14,36 +13,7 @@ export default function TaskCreateScreen() {
   const [titleError, setTitleError] = useState("");
   const [descriptionError, setDescriptionError] = useState("")
 
-  const theme = useTheme(); // Access the theme from React Native Paper
-
-  // const validateTitle = (value: string) => {
-  //   const trimmedValue = value.trim();
-
-  //   if (trimmedValue.length === 0) {
-  //     setTitleError("Title is required");
-  //     return;
-  //   }
-
-  //   if (trimmedValue.length > 30) {
-  //     setTitleError("Title should be at most 30 characters");
-  //     return;
-  //   }
-
-  //   setTitleError(""); // Clear error if valid
-  //   return;
-  // };
-
-  // const validateDescription = (value: string) => {
-  //   const trimmedValue = value.trim();
-
-  //   if (trimmedValue.length > 100) {
-  //     setDescriptionError("Description should be at most 100 characters");
-  //     return;
-  //   }
-
-  //   setDescriptionError(""); // Clear error if valid
-  //   return;
-  // }
+  const theme = useTheme();
 
   const handleTitleChange = (value: string) => {
     setTitle(value);
@@ -69,21 +39,7 @@ export default function TaskCreateScreen() {
         router.replace('/tasks')
       }
     } catch (error) {
-      if (axios.isAxiosError(error)) {
-        console.log(error.response?.data, 'its an error')
-        const errorCode = error.response?.data.errorCode;
-        const errorMessage = error.response?.data.message || "An error occurred. Please try again.";
-
-        // let userFriendlyMessage = "An error occurred. Please try again."; // Default message
-
-        // console.log(userFriendlyMessage, "friendly message");
-        // await AsyncStorage.multiRemove(["fname", "lname", "mobile", "email", "role", "accessToken", "username"]);
-        // router.replace('/')
-        Alert.alert("Error", errorMessage);
-      } else {
-
-        Alert.alert("Error", "Failed to create task.");
-      }
+      handleApiError(error)
     } finally {
       setLoading(false);
     }
