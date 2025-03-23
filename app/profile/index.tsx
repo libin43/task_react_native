@@ -23,24 +23,16 @@ const ProfileScreen = () => {
 
   // Fetch user data from Async Storage
   const fetchUserData = async () => {
+    try {
+      const username = await AsyncStorage.getItem("username");
+      const role = await AsyncStorage.getItem("role");
 
-    if(userContext){
-        const lname = userContext.lname
-        const fname = userContext.fname
-        const role = userContext.role
-        const username = `${fname} ${lname}`
+      if (username && role) {
         setUserData({ role, username });
+      }
+    } catch (error) {
+      console.error("Error fetching user data:", error);
     }
-    // try {
-    //   const username = await AsyncStorage.getItem("username");
-    //   const role = await AsyncStorage.getItem("role");
-
-    //   if (username && role) {
-    //     setUserData({ role, username });
-    //   }
-    // } catch (error) {
-    //   console.error("Error fetching user data:", error);
-    // }
   };
 
 

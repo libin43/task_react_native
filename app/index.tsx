@@ -55,11 +55,13 @@ export default function Index() {
         const fName = response.data.data.fname;
         const lName = response.data.data.lname
         const role = response.data.data.role;
+        const userName = `${fName} ${lName}`
         await AsyncStorage.setItem("accessToken", accessToken);
         if(userContext){
+          console.log('setting........', fName, role)
           userContext.setUser(fName, lName, role)
         }
-        // await AsyncStorage.setItem("username", userName);
+        await AsyncStorage.setItem("username", userName);
         await AsyncStorage.setItem("role", role);
         console.log('Token has been set');
 

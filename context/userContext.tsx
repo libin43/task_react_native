@@ -18,7 +18,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
   const [role, setRole] = useState<string>("")
 
   // Function to set user data
-  const setUser = (fname: string, lname: string) => {
+  const setUser = (fname: string, lname: string, role: string) => {
     setFname(fname);
     setLname(lname);
     setRole(role);
