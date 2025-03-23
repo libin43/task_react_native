@@ -1,113 +1,155 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, Button, Alert } from "react-native";
+import { View, StyleSheet, Alert } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
+import { 
+  Avatar, 
+  Card, 
+  Text, 
+  Button, 
+  Title, 
+  Divider, 
+  List
+} from "react-native-paper";
 
 const ProfileScreen = () => {
-    const [userData, setUserData] = useState({
-        // fname: "",
-        // lname: "",
-        // mobile: "",
-        // email: "",
-        role: "",
-        username: '',
-    });
+  const [userData, setUserData] = useState({
+    role: "",
+    username: '',
+  });
 
-    // Fetch user data from Async Storage
-    useEffect(() => {
-        const fetchUserData = async () => {
-            try {
-                const username = await AsyncStorage.getItem("username")
-                const fname = await AsyncStorage.getItem("fname");
-                const lname = await AsyncStorage.getItem("lname");
-                const mobile = await AsyncStorage.getItem("mobile");
-                const email = await AsyncStorage.getItem("email");
-                const role = await AsyncStorage.getItem("role");
+  // Fetch user data from Async Storage
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const username = await AsyncStorage.getItem("username");
+        const role = await AsyncStorage.getItem("role");
 
-                // if (fname && lname && mobile && email && role && username) {
-                //   setUserData({ fname, lname, mobile, email, role, username });
-                // }
-                if (username && role) {
-                    setUserData({ role, username });
-                }
-            } catch (error) {
-                console.error("Error fetching user data:", error);
-            }
-        };
-
-        fetchUserData();
-    }, []);
-
-    // Handle logout
-    const handleLogout = async () => {
-        try {
-            // Clear all user-related data from Async Storage
-            await AsyncStorage.multiRemove(["fname", "lname", "mobile", "email", "role", "accessToken", "username"]);
-            // Navigate to the login screen
-            router.replace("/");
-            Alert.alert("Success", "Logout successful!");
-        } catch (error) {
-            console.error("Error logging out:", error);
-            Alert.alert("Error", "Logging out.");
+        if (username && role) {
+          setUserData({ role, username });
         }
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      }
     };
 
-    return (
-        <View style={styles.container}>
-            <Text style={styles.header}>Profile</Text>
+    fetchUserData();
+  }, []);
 
-            {/* Display User Information */}
-            <View style={styles.userInfo}>
-                <Text style={styles.label}>User Name:</Text>
-                <Text style={styles.value}>{userData.username}</Text>
+  // Handle logout
+  const handleLogout = async () => {
+    try {
+      // Clear all user-related data from Async Storage
+      await AsyncStorage.multiRemove([
+        "fname", 
+        "lname", 
+        "mobile", 
+        "email", 
+        "role", 
+        "accessToken", 
+        "username"
+      ]);
+      
+      // Navigate to the login screen
+      router.replace("/");
+      Alert.alert("Success", "Logout successful!");
+    } catch (error) {
+      console.error("Error logging out:", error);
+      Alert.alert("Error", "Logging out.");
+    }
+  };
 
-                {/* <Text style={styles.label}>First Name:</Text>
-        <Text style={styles.value}>{userData.fname}</Text>
+  // Get initials for avatar
+  const getInitials = () => {
+    return userData.username ? userData.username.charAt(0).toUpperCase() : "U";
+  };
 
-        <Text style={styles.label}>Last Name:</Text>
-        <Text style={styles.value}>{userData.lname}</Text>
+  return (
+    <View style={styles.container}>
 
-        <Text style={styles.label}>Mobile:</Text>
-        <Text style={styles.value}>{userData.mobile}</Text>
+      <Card style={styles.profileCard}>
+        <Card.Content style={styles.profileCardContent}>
+          <Avatar.Text
+            size={80} 
+            label={getInitials()} 
+            style={styles.avatar} 
+          />
+          <Title style={styles.username}>{userData.username}</Title>
+          <Text style={styles.roleText}>{userData.role}</Text>
+        </Card.Content>
+      </Card>
 
-        <Text style={styles.label}>Email:</Text>
-        <Text style={styles.value}>{userData.email}</Text> */}
+      <Card style={styles.detailsCard}>
+        <Card.Content>
+          <Title style={styles.sectionTitle}>Account Details</Title>
+          <Divider />
+          
+          <List.Section>
+            <List.Item
+              title="Username"
+              description={userData.username}
+              left={() => <List.Icon icon="account" />}
+            />
+            <Divider />
+            <List.Item
+              title="Role"
+              description={userData.role}
+              left={() => <List.Icon icon="shield-account" />}
+            />
+            
+          </List.Section>
+        </Card.Content>
+      </Card>
 
-                <Text style={styles.label}>Role:</Text>
-                <Text style={styles.value}>{userData.role}</Text>
-            </View>
-
-            {/* Logout Button */}
-            <Button title="Logout" onPress={handleLogout} />
-        </View>
-    );
+      <Button 
+        mode="contained" 
+        icon="logout" 
+        style={styles.logoutButton}
+        onPress={handleLogout}
+      >
+        Logout
+      </Button>
+    </View>
+  );
 };
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        padding: 20,
-        backgroundColor: "#fff",
-    },
-    header: {
-        fontSize: 24,
-        fontWeight: "bold",
-        marginBottom: 20,
-        textAlign: "center",
-    },
-    userInfo: {
-        marginBottom: 20,
-    },
-    label: {
-        fontSize: 16,
-        fontWeight: "bold",
-        marginTop: 10,
-    },
-    value: {
-        fontSize: 16,
-        marginBottom: 10,
-        color: "#555",
-    },
+  container: {
+    flex: 1,
+    backgroundColor: "#f5f5f5",
+  },
+  profileCard: {
+    marginHorizontal: 16,
+    margin: 16
+  },
+  profileCardContent: {
+    alignItems: "center",
+    paddingVertical: 20,
+  },
+  avatar: {
+    marginBottom: 16,
+  },
+  username: {
+    fontSize: 22,
+    marginBottom: 4,
+  },
+  roleText: {
+    fontSize: 16,
+    opacity: 0.7,
+  },
+  detailsCard: {
+    marginHorizontal: 16,
+    marginBottom: 16,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    marginBottom: 8,
+  },
+  logoutButton: {
+    marginHorizontal: 16,
+    marginTop: 8,
+    padding: 8,
+  },
 });
 
 export default ProfileScreen;
