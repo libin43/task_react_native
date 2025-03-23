@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { View, StyleSheet, Alert, Keyboard, ImageBackground, KeyboardAvoidingView, Platform, ScrollView } from "react-native";
 import { TextInput, Button, Text, Provider as PaperProvider, Surface, Avatar, Headline, Caption, useTheme } from "react-native-paper";
 import axios from "axios";
@@ -6,6 +6,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Link, router } from "expo-router";
 import { SIGNIN_API } from "@/api/signin";
 import { CustomButton } from "@/components/Button/CustomButton";
+import { UserContext, UserContextType } from "@/context/userContext";
 
 export default function Index() {
   // State for email and password
@@ -14,6 +15,14 @@ export default function Index() {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const theme = useTheme();
+
+
+  const userContext = useContext(UserContext)
+  console.log(userContext, 'us')
+
+  // if(us){
+  //   const {} = us
+  // }
 
   useEffect(() => {
     checkLoginStatus();
@@ -43,10 +52,14 @@ export default function Index() {
         Alert.alert("Success", "Login successful!");
         console.log(response.data.data.fname, 'MY Name');
         const accessToken = response.data.data.accessToken;
-        const userName = `${response.data.data.fname} ${response.data.data.lname}`;
+        const fName = response.data.data.fname;
+        const lName = response.data.data.lname
         const role = response.data.data.role;
         await AsyncStorage.setItem("accessToken", accessToken);
-        await AsyncStorage.setItem("username", userName);
+        if(userContext){
+          userContext.setUser(fName, lName, role)
+        }
+        // await AsyncStorage.setItem("username", userName);
         await AsyncStorage.setItem("role", role);
         console.log('Token has been set');
 

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { View, StyleSheet, Alert } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
@@ -11,6 +11,7 @@ import {
   Divider, 
   List
 } from "react-native-paper";
+import { UserContext } from "@/context/userContext";
 
 const ProfileScreen = () => {
   const [userData, setUserData] = useState({
@@ -18,18 +19,28 @@ const ProfileScreen = () => {
     username: '',
   });
 
+  const userContext = useContext(UserContext)
+
   // Fetch user data from Async Storage
   const fetchUserData = async () => {
-    try {
-      const username = await AsyncStorage.getItem("username");
-      const role = await AsyncStorage.getItem("role");
 
-      if (username && role) {
+    if(userContext){
+        const lname = userContext.lname
+        const fname = userContext.fname
+        const role = userContext.role
+        const username = `${fname} ${lname}`
         setUserData({ role, username });
-      }
-    } catch (error) {
-      console.error("Error fetching user data:", error);
     }
+    // try {
+    //   const username = await AsyncStorage.getItem("username");
+    //   const role = await AsyncStorage.getItem("role");
+
+    //   if (username && role) {
+    //     setUserData({ role, username });
+    //   }
+    // } catch (error) {
+    //   console.error("Error fetching user data:", error);
+    // }
   };
 
 
