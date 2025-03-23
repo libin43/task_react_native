@@ -4,6 +4,7 @@ import { Text, Provider as PaperProvider, Card, Title, Button, useTheme, IconBut
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
 import axios from "axios";
+import { GET_ALL_TASKS_API } from "@/api/getAllTasks";
 
 type Task = {
     _id: string;
@@ -24,18 +25,9 @@ const HomeScreen = () => {
 
     const fetchTasks = async () => {
         setLoading(true);
-        const token = await AsyncStorage.getItem('accessToken');
 
         try {
-            const response = await axios.get(
-                "https://taskmanager-backend-214z.onrender.com/api/v1/tasks",
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`
-                    }
-                }
-            );
-
+            const response = await GET_ALL_TASKS_API()
             if (response.data.data) {
                 setTasks(response.data.data);
             }

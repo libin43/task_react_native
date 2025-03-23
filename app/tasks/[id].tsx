@@ -12,10 +12,14 @@ import {
 import { router, useLocalSearchParams } from "expo-router";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { GET_TASK_BY_ID_API } from "@/api/getTaskById";
+import { UPDATE_TASK_API } from "@/api/updateTask";
+import { DELETE_TASK_API } from "@/api/deleteTask";
+import { validateDescription, validateTitle } from "@/utils/validation";
 
 const TaskDetailScreen = () => {
   const theme = useTheme();
-  const { id } = useLocalSearchParams(); // Get the task ID from the URL
+  const { id }: {id: string} = useLocalSearchParams(); // Get the task ID from the URL
   const [task, setTask] = useState({ _id: "", title: "", description: "" });
   const [loading, setLoading] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -26,43 +30,43 @@ const TaskDetailScreen = () => {
 
 
 
-  const validateTitle = (value: string) => {
-    const trimmedValue = value.trim();
+  // const validateTitle = (value: string) => {
+  //   const trimmedValue = value.trim();
 
-    if (trimmedValue.length === 0) {
-      setTitleError("Title is required");
-      return;
-    }
+  //   if (trimmedValue.length === 0) {
+  //     setTitleError("Title is required");
+  //     return;
+  //   }
 
-    if (trimmedValue.length > 30) {
-      setTitleError("Title should be at most 30 characters");
-      return;
-    }
+  //   if (trimmedValue.length > 30) {
+  //     setTitleError("Title should be at most 30 characters");
+  //     return;
+  //   }
 
-    setTitleError(""); // Clear error if valid
-    return;
-  };
+  //   setTitleError(""); // Clear error if valid
+  //   return;
+  // };
 
-  const validateDescription = (value: string) => {
-    const trimmedValue = value.trim();
+  // const validateDescription = (value: string) => {
+  //   const trimmedValue = value.trim();
 
-    if (trimmedValue.length > 100) {
-      setDescriptionError("Description should be at most 100 characters");
-      return;
-    }
+  //   if (trimmedValue.length > 100) {
+  //     setDescriptionError("Description should be at most 100 characters");
+  //     return;
+  //   }
 
-    setDescriptionError(""); // Clear error if valid
-    return;
-  }
+  //   setDescriptionError(""); // Clear error if valid
+  //   return;
+  // }
 
   const handleTitleChange = (value: string) => {
     setUpdatedTitle(value);
-    validateTitle(value);
+    setTitleError(validateTitle(value))
   };
 
   const handleDescriptionChange = (value: string) => {
     setUpdatedDescription(value)
-    validateDescription(value)
+    setDescriptionError(validateDescription(value))
   }
 
   const fetchTask = async () => {
@@ -77,14 +81,7 @@ const TaskDetailScreen = () => {
     try {
 
 
-      const response = await axios.get(
-        `https://taskmanager-backend-214z.onrender.com/api/v1/tasks/${id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await GET_TASK_BY_ID_API(id)
 
       setTask(response.data.data);
       setUpdatedTitle(response.data.data.title);
@@ -118,18 +115,7 @@ const TaskDetailScreen = () => {
 
       setLoading(true);
 
-      const update = await axios.put(
-        `https://taskmanager-backend-214z.onrender.com/api/v1/tasks/${id}`,
-        {
-          title: updatedTitle,
-          description: updatedDescription,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const update = await UPDATE_TASK_API(id, updatedTitle, updatedDescription)
 
       if (update.data.success) {
         setIsEditing(false);
@@ -159,28 +145,16 @@ const TaskDetailScreen = () => {
 
   // Handle task deletion
   const handleDelete = async () => {
-    const token = await AsyncStorage.getItem("accessToken");
-    if (!token) {
-      Alert.alert("Authentication Error", "No access token found. Please log in.");
-      return;
-    }
 
     setLoading(true);
     try {
-      await axios.delete(
-        `https://taskmanager-backend-214z.onrender.com/api/v1/tasks/${id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
+      await DELETE_TASK_API(id)
       Alert.alert("Success", "Task deleted successfully!");
       router.replace("/tasks");
     } catch (error) {
       console.error("Error deleting task:", error);
       Alert.alert("Error", "Failed to delete task.");
+    } finally{
       setLoading(false);
     }
   };

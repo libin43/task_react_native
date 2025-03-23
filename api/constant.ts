@@ -1,0 +1,1 @@
+export const API_BASE_URL = "https://taskmanager-backend-214z.onrender.com/api/v1"

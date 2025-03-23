@@ -19,20 +19,21 @@ const ProfileScreen = () => {
   });
 
   // Fetch user data from Async Storage
-  useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const username = await AsyncStorage.getItem("username");
-        const role = await AsyncStorage.getItem("role");
+  const fetchUserData = async () => {
+    try {
+      const username = await AsyncStorage.getItem("username");
+      const role = await AsyncStorage.getItem("role");
 
-        if (username && role) {
-          setUserData({ role, username });
-        }
-      } catch (error) {
-        console.error("Error fetching user data:", error);
+      if (username && role) {
+        setUserData({ role, username });
       }
-    };
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+    }
+  };
 
+
+  useEffect(() => {
     fetchUserData();
   }, []);
 

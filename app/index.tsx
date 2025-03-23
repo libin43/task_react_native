@@ -4,6 +4,7 @@ import { TextInput, Button, Text, Provider as PaperProvider, Surface, Avatar, He
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Link, router } from "expo-router";
+import { SIGNIN_API } from "@/api/signin";
 
 export default function Index() {
   // State for email and password
@@ -18,17 +19,11 @@ export default function Index() {
   }, []);
 
   const checkLoginStatus = async () => {
-    try {
       const token = await AsyncStorage.getItem("accessToken");
       if (token) {
-        Alert.alert("Info", "You are already logged in.");
-        // Navigate to the home screen or perform other actions
         router.replace("/tasks");
       }
-    } catch (error) {
-      console.error("Error checking login status:", error);
-    }
-  };
+  }
 
   // Function to handle login
   const handleLogin = async () => {
@@ -40,13 +35,7 @@ export default function Index() {
     setLoading(true);
 
     try {
-      const response = await axios.post(
-        "https://taskmanager-backend-214z.onrender.com/api/v1/auth/login",
-        {
-          email,
-          password,
-        }
-      );
+      const response = await SIGNIN_API(email, password)
 
       // Handle successful login
       if (response.data) {
@@ -60,7 +49,7 @@ export default function Index() {
         await AsyncStorage.setItem("role", role);
         console.log('Token has been set');
 
-        // Redirect to Home Screen
+        // Redirect to Tasks Screen
         router.replace("/tasks");
       }
       console.log("Login Response:", response.data);

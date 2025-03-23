@@ -1,3 +1,4 @@
+import { SIGNUP_API } from "@/api/signup";
 import axios from "axios";
 import { router } from "expo-router";
 import React, { useState } from "react";
@@ -9,7 +10,6 @@ export default function SignupScreen() {
   const [lname, setLname] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const role = "USER";
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const theme = useTheme();
@@ -61,16 +61,7 @@ export default function SignupScreen() {
     setLoading(true);
 
     try {
-      const response = await axios.post(
-        "https://taskmanager-backend-214z.onrender.com/api/v1/auth/signup",
-        {
-          fname,
-          lname,
-          email,
-          role,
-          password,
-        }
-      );
+      const response = await SIGNUP_API(fname, lname, email, password)
 
       console.log(response, "User registration response");
 

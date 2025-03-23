@@ -1,3 +1,5 @@
+import { CREATE_TASK_API } from "@/api/createTask";
+import { validateDescription, validateTitle } from "@/utils/validation";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios, { AxiosError } from "axios";
 import { router } from "expo-router";
@@ -14,65 +16,53 @@ export default function TaskCreateScreen() {
 
   const theme = useTheme(); // Access the theme from React Native Paper
 
-  const validateTitle = (value: string) => {
-    const trimmedValue = value.trim();
+  // const validateTitle = (value: string) => {
+  //   const trimmedValue = value.trim();
 
-    if (trimmedValue.length === 0) {
-      setTitleError("Title is required");
-      return;
-    }
+  //   if (trimmedValue.length === 0) {
+  //     setTitleError("Title is required");
+  //     return;
+  //   }
 
-    if (trimmedValue.length > 30) {
-      setTitleError("Title should be at most 30 characters");
-      return;
-    }
+  //   if (trimmedValue.length > 30) {
+  //     setTitleError("Title should be at most 30 characters");
+  //     return;
+  //   }
 
-    setTitleError(""); // Clear error if valid
-    return;
-  };
+  //   setTitleError(""); // Clear error if valid
+  //   return;
+  // };
 
-  const validateDescription = (value: string) => {
-    const trimmedValue = value.trim();
+  // const validateDescription = (value: string) => {
+  //   const trimmedValue = value.trim();
 
-    if (trimmedValue.length > 100) {
-      setDescriptionError("Description should be at most 100 characters");
-      return;
-    }
+  //   if (trimmedValue.length > 100) {
+  //     setDescriptionError("Description should be at most 100 characters");
+  //     return;
+  //   }
 
-    setDescriptionError(""); // Clear error if valid
-    return;
-  }
+  //   setDescriptionError(""); // Clear error if valid
+  //   return;
+  // }
 
   const handleTitleChange = (value: string) => {
     setTitle(value);
-    validateTitle(value);
+   setTitleError(validateTitle(value))
   };
 
   const handleDescriptionChange = (value: string) => {
     setDescription(value)
-    validateDescription(value)
+     setDescriptionError(validateDescription(value))
   }
 
   const handleCreateTask = async () => {
     console.log(title, 'title', description, 'description')
 
 
-    const token = await AsyncStorage.getItem("accessToken");
     setLoading(true);
 
     try {
-      const task = await axios.post(
-        "https://taskmanager-backend-214z.onrender.com/api/v1/tasks",
-        {
-          title: title,
-          ...(description.length > 0 && { description: description }),
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const task = await CREATE_TASK_API(title, description)
 
       if (task.data) {
         Alert.alert("Success", "Task created successfully!");
