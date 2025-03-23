@@ -69,18 +69,16 @@ export default function TaskCreateScreen() {
         router.replace('/tasks')
       }
     } catch (error) {
-      console.error("Error creating task:", error);
       if (axios.isAxiosError(error)) {
-        console.log(error, 'its an error')
-        console.log(error.response, 'error response');
-        const errorCode = error.response?.data.errorCode; // Extract the error code
-        const errorMessage = error.response?.data.message || "Signup failed."; // Extract the error message
+        console.log(error.response?.data, 'its an error')
+        const errorCode = error.response?.data.errorCode;
+        const errorMessage = error.response?.data.message || "An error occurred. Please try again.";
 
         // let userFriendlyMessage = "An error occurred. Please try again."; // Default message
 
         // console.log(userFriendlyMessage, "friendly message");
-        await AsyncStorage.multiRemove(["fname", "lname", "mobile", "email", "role", "accessToken", "username"]);
-        router.replace('/')
+        // await AsyncStorage.multiRemove(["fname", "lname", "mobile", "email", "role", "accessToken", "username"]);
+        // router.replace('/')
         Alert.alert("Error", errorMessage);
       } else {
 

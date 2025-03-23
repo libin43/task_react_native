@@ -6,7 +6,7 @@ export const CREATE_TASK_API = async (title: string, description: string) => {
     try {
         const token = await AsyncStorage.getItem('accessToken');
         const response = await axios.post(
-            `${API_BASE_URL}/tasks}`,
+            `${API_BASE_URL}/tasks`,
             {
                 title,
                 description,
