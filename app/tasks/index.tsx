@@ -112,6 +112,7 @@ const HomeScreen = () => {
                 tintColor={theme.colors.primary}
               />
             }
+            // scrollIndicatorInsets={}
             data={tasks}
             keyExtractor={(item) => item._id}
             renderItem={({ item }) => (

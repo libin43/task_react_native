@@ -21,6 +21,49 @@ const TaskDetailScreen = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [updatedTitle, setUpdatedTitle] = useState("");
   const [updatedDescription, setUpdatedDescription] = useState("");
+  const [titleError, setTitleError] = useState("")
+  const [descriptionError, setDescriptionError] = useState("")
+
+
+
+  const validateTitle = (value: string) => {
+    const trimmedValue = value.trim();
+
+    if (trimmedValue.length === 0) {
+      setTitleError("Title is required");
+      return;
+    }
+
+    if (trimmedValue.length > 30) {
+      setTitleError("Title should be at most 30 characters");
+      return;
+    }
+
+    setTitleError(""); // Clear error if valid
+    return;
+  };
+
+  const validateDescription = (value: string) => {
+    const trimmedValue = value.trim();
+
+    if (trimmedValue.length > 100) {
+      setDescriptionError("Description should be at most 100 characters");
+      return;
+    }
+
+    setDescriptionError(""); // Clear error if valid
+    return;
+  }
+
+  const handleTitleChange = (value: string) => {
+    setUpdatedTitle(value);
+    validateTitle(value);
+  };
+
+  const handleDescriptionChange = (value: string) => {
+    setUpdatedDescription(value)
+    validateDescription(value)
+  }
 
   const fetchTask = async () => {
     const token = await AsyncStorage.getItem("accessToken");
@@ -89,9 +132,9 @@ const TaskDetailScreen = () => {
       );
 
       if (update.data.success) {
+        setIsEditing(false);
         fetchTask();
         Alert.alert("Success", "Task updated successfully!");
-        setIsEditing(false);
       }
     } catch (error) {
       console.error("Error updating task:", error);
@@ -161,23 +204,24 @@ const TaskDetailScreen = () => {
             <TextInput
               label="Title"
               value={updatedTitle}
-              onChangeText={setUpdatedTitle}
+              onChangeText={handleTitleChange}
               style={styles.input}
               mode="outlined"
               error={!updatedTitle.trim()}
             />
-            {!updatedTitle.trim() && (
-              <Text style={styles.errorText}>Title is required</Text>
-            )}
+                {titleError ? <Text style={styles.errorText}>{titleError}</Text> : null}
+          
             <TextInput
               label="Description"
               value={updatedDescription}
-              onChangeText={setUpdatedDescription}
+              onChangeText={handleDescriptionChange}
               style={styles.input}
               multiline
               mode="outlined"
               numberOfLines={4}
             />
+
+                  {descriptionError ? <Text style={styles.errorText}>{descriptionError}</Text> : null}
 
             <Card.Actions >
               <Button
@@ -186,7 +230,7 @@ const TaskDetailScreen = () => {
                 style={styles.actionButton}
                 icon="content-save"
                 loading={loading}
-                disabled={loading || !updatedTitle.trim()}
+                disabled={loading || !!titleError || !!descriptionError}
               >
                 Save
               </Button>
