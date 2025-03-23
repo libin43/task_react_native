@@ -41,6 +41,19 @@ const HomeScreen = () => {
       }
     } catch (error) {
       Alert.alert("Error", "Failed to load tasks. Please try again.");
+      if(axios.isAxiosError(error)){
+                console.log(error,'its an error')
+                console.log(error.response, 'error response');
+                const errorCode = error.response?.data.errorCode; // Extract the error code
+                const errorMessage = error.response?.data.message || "Signup failed."; // Extract the error message
+        
+                // let userFriendlyMessage = "An error occurred. Please try again."; // Default message
+      
+                // console.log(userFriendlyMessage, "friendly message");
+                await AsyncStorage.multiRemove(["fname", "lname", "mobile", "email", "role", "accessToken", "username"]);
+                router.replace('/')
+                Alert.alert("Error", errorMessage);
+      }
       console.error("Task Loading Error:", error);
     } finally {
       setLoading(false);
@@ -78,7 +91,7 @@ const HomeScreen = () => {
         <Button
           mode="contained"
           onPress={() => router.push("/tasks/create")}
-          style={styles.createButton}
+          style={[styles.createButton, {backgroundColor: theme.colors.primary}]}
           icon="plus"
         >
           Create Task
