@@ -1,16 +1,21 @@
-import React, { useState } from "react";
-import { View, StyleSheet, Alert } from "react-native";
-import { TextInput, Button, Text, Provider as PaperProvider } from "react-native-paper";
+import React, { useState, useEffect } from "react";
+import { View, StyleSheet, Alert, Keyboard, ImageBackground, KeyboardAvoidingView, Platform, ScrollView } from "react-native";
+import { TextInput, Button, Text, Provider as PaperProvider, Surface, Avatar, Headline, Caption, useTheme } from "react-native-paper";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { router } from "expo-router";
+import { Link, router } from "expo-router";
 
 export default function Index() {
-  // State for mobile and password
-  const [mobile, setMobile] = useState("")
-  const [password, setPassword] = useState("")
-  const [loading, setLoading] = useState(false)
+  // State for email and password
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const theme = useTheme();
 
+  useEffect(() => {
+    checkLoginStatus();
+  }, []);
 
   const checkLoginStatus = async () => {
     try {
@@ -18,6 +23,7 @@ export default function Index() {
       if (token) {
         Alert.alert("Info", "You are already logged in.");
         // Navigate to the home screen or perform other actions
+        router.replace("/tasks");
       }
     } catch (error) {
       console.error("Error checking login status:", error);
@@ -26,8 +32,8 @@ export default function Index() {
 
   // Function to handle login
   const handleLogin = async () => {
-    if (!mobile || !password) {
-      Alert.alert("Error", "Please enter both mobile and password.");
+    if (!email || !password) {
+      Alert.alert("Error", "Please enter both email and password.");
       return;
     }
 
@@ -37,95 +43,219 @@ export default function Index() {
       const response = await axios.post(
         "https://taskmanager-backend-214z.onrender.com/api/v1/auth/login",
         {
-          mobile,
+          email,
           password,
         }
       );
 
       // Handle successful login
       if (response.data) {
-
         Alert.alert("Success", "Login successful!");
-        console.log(response.data.data.fname, 'MY Name')
-        const accessToken = response.data.data.accessToken
-        const userName = `${response.data.data.fname} ${response.data.data.lname}`
-        const role = response.data.data.role
-        await AsyncStorage.setItem("accessToken", accessToken)
-        await AsyncStorage.setItem("username", userName)
-        await AsyncStorage.setItem("role", role)
-        console.log('Token has been set')
+        console.log(response.data.data.fname, 'MY Name');
+        const accessToken = response.data.data.accessToken;
+        const userName = `${response.data.data.fname} ${response.data.data.lname}`;
+        const role = response.data.data.role;
+        await AsyncStorage.setItem("accessToken", accessToken);
+        await AsyncStorage.setItem("username", userName);
+        await AsyncStorage.setItem("role", role);
+        console.log('Token has been set');
 
         // Redirect to Home Screen
         router.replace("/tasks");
-
       }
       console.log("Login Response:", response.data);
     } catch (error) {
       // Handle login error
       Alert.alert("Error", "Login failed. Please check your credentials.");
-      console.error("Login Error:", error);
+      // console.error("Login Error:", error);
     } finally {
       setLoading(false);
     }
   };
 
+  const goToSignup = () => {
+    router.replace("/signup");
+  };
+
   return (
     <PaperProvider>
-      <View style={styles.container}>
-        <Text style={styles.title}>Login</Text>
-
-        {/* Mobile Input */}
-        <TextInput
-          label="Mobile"
-          placeholder="Enter asdfjai"
-          value={mobile}
-          onChangeText={setMobile}
-          style={styles.input}
-          keyboardType="phone-pad"
-          mode="outlined"
-        />
-
-        {/* Password Input */}
-        <TextInput
-          label="Password"
-          value={password}
-          onChangeText={setPassword}
-          style={styles.input}
-          secureTextEntry
-          mode="outlined"
-        />
-
-        {/* Login Button */}
-        <Button
-          mode="contained"
-          onPress={handleLogin}
-          loading={loading}
-          disabled={loading}
-          style={styles.button}
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={{ flex: 1 }}
+      >
+        <ImageBackground
+          source={{ uri: "https://images.unsplash.com/photo-1558591710-4b4a1ae0f04d?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80" }}
+          style={styles.backgroundImage}
         >
-          {loading ? "Logging in..." : "Login"}
-        </Button>
-      </View>
+          <View style={styles.overlay} />
+          <ScrollView
+            contentContainerStyle={styles.container}
+            keyboardShouldPersistTaps="handled"
+            onStartShouldSetResponder={() => {
+              Keyboard.dismiss();
+              return false;
+            }}
+          >
+            <Surface style={styles.formContainer}>
+              {/* Header with Logo */}
+              <View style={styles.header}>
+                <Avatar.Icon 
+                  size={80} 
+                  icon="login" 
+                  color="#fff" 
+                  style={{ backgroundColor: theme.colors.primary }} 
+                />
+                <Headline style={styles.title}>Welcome Back</Headline>
+                <Caption style={styles.subtitle}>Log in to your Cave Digital account</Caption>
+              </View>
+              
+              <View style={styles.formFields}>
+                {/* Email Input */}
+                <TextInput
+                  label="Email"
+                  value={email}
+                  onChangeText={setEmail}
+                  style={styles.input}
+                  keyboardType="email-address"
+                  mode="outlined"
+                  left={<TextInput.Icon icon="email" />}
+                  theme={{ roundness: 10 }}
+                  autoCapitalize="none"
+                />
+
+                {/* Password Input */}
+                <TextInput
+                  label="Password"
+                  value={password}
+                  onChangeText={setPassword}
+                  style={styles.input}
+                  secureTextEntry={!showPassword}
+                  mode="outlined"
+                  left={<TextInput.Icon icon="lock" />}
+                  right={
+                    <TextInput.Icon
+                      icon={showPassword ? "eye-off" : "eye"}
+                      onPress={() => setShowPassword(!showPassword)}
+                      forceTextInputFocus={false}
+                    />
+                  }
+                  theme={{ roundness: 10 }}
+                />
+
+                {/* Login Button */}
+                <Button
+                  mode="contained"
+                  onPress={handleLogin}
+                  loading={loading}
+                  disabled={loading}
+                  style={styles.button}
+                  labelStyle={styles.buttonLabel}
+                  theme={{ roundness: 25 }}
+                >
+                  {loading ? "Signing In..." : "Sign In"}
+                </Button>
+
+                {/* Forgot Password */}
+                <Button
+                  mode="text"
+                  onPress={() => Alert.alert("Info", "Password reset feature coming soon!")}
+                  style={styles.forgotPassword}
+                >
+                  Forgot Password?
+                </Button>
+
+                {/* Signup Link */}
+                <View style={styles.signupLink}>
+                  <Text style={styles.signupText}>Don't have an account? </Text>
+                  <Button
+                    mode="text"
+                    onPress={goToSignup}
+                    style={styles.textButton}
+                    labelStyle={styles.textButtonLabel}
+                  >
+                    Create Account
+                  </Button>
+                </View>
+              </View>
+            </Surface>
+          </ScrollView>
+        </ImageBackground>
+      </KeyboardAvoidingView>
     </PaperProvider>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  backgroundImage: {
     flex: 1,
+    width: "100%",
+    height: "100%",
+  },
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0, 0, 0, 0.6)",
+  },
+  container: {
+    flexGrow: 1,
     justifyContent: "center",
     padding: 20,
+  },
+  formContainer: {
+    borderRadius: 15,
+    padding: 20,
+    elevation: 4,
+    // backgroundColor: "rgba(255, 255, 255, 0.95)",
+  },
+  header: {
+    alignItems: "center",
+    marginBottom: 20,
   },
   title: {
     fontSize: 24,
     fontWeight: "bold",
-    textAlign: "center",
-    marginBottom: 20,
+    marginTop: 10,
+    color: "#333",
+  },
+  subtitle: {
+    fontSize: 14,
+    color: "#666",
+    marginTop: 5,
+  },
+  formFields: {
+    marginTop: 10,
   },
   input: {
     marginBottom: 15,
+    backgroundColor: "transparent",
   },
   button: {
-    marginTop: 10,
+    marginTop: 20,
+    paddingVertical: 8,
+    elevation: 3,
+  },
+  buttonLabel: {
+    fontSize: 16,
+    fontWeight: "bold",
+    paddingVertical: 4,
+  },
+  forgotPassword: {
+    alignSelf: "center",
+    marginTop: 15,
+  },
+  signupLink: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 15,
+  },
+  signupText: {
+    color: "#666",
+  },
+  textButton: {
+    margin: 0,
+    padding: 0,
+  },
+  textButtonLabel: {
+    margin: 0,
   },
 });

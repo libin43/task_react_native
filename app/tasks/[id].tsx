@@ -1,25 +1,38 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, Alert } from "react-native";
-import { Button, TextInput } from "react-native-paper";
+import { View, StyleSheet, Alert } from "react-native";
+import {
+  ActivityIndicator,
+  Button,
+  TextInput,
+  Card,
+  Text,
+  Divider,
+  useTheme
+} from "react-native-paper";
 import { router, useLocalSearchParams } from "expo-router";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const TaskDetailScreen = () => {
+  const theme = useTheme();
   const { id } = useLocalSearchParams(); // Get the task ID from the URL
-  const [task, setTask] = useState({ id: "", title: "", description: "" });
+  const [task, setTask] = useState({ _id: "", title: "", description: "" });
+  const [loading, setLoading] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [updatedTitle, setUpdatedTitle] = useState("");
   const [updatedDescription, setUpdatedDescription] = useState("");
 
   const fetchTask = async () => {
+    const token = await AsyncStorage.getItem("accessToken");
+    if (!token) {
+      Alert.alert("Authentication Error", "No access token found. Please log in.");
+      return;
+    }
+
+    setLoading(true);
+    
     try {
-      const token = await AsyncStorage.getItem("accessToken");
-      if (!token) {
-        Alert.alert("Error", "No access token found. Please log in.");
-      //   router.replace("/(auth)/login");
-        return;
-      }
+
 
       const response = await axios.get(
         `https://taskmanager-backend-214z.onrender.com/api/v1/tasks/${id}`,
@@ -36,22 +49,31 @@ const TaskDetailScreen = () => {
     } catch (error) {
       console.error("Error fetching task:", error);
       Alert.alert("Error", "Failed to fetch task details.");
+    } finally {
+      setLoading(false);
     }
   };
+
   // Fetch task details
   useEffect(() => {
-
     fetchTask();
   }, [id]);
 
   // Handle task update
   const handleUpdate = async () => {
     try {
-      const token = await AsyncStorage.getItem("accessToken");
-      if (!token) {
-        Alert.alert("Error", "No access token found. Please log in.");
+      if (!updatedTitle.trim()) {
+        Alert.alert("Validation Error", "Task title cannot be empty");
         return;
       }
+
+      const token = await AsyncStorage.getItem("accessToken");
+      if (!token) {
+        Alert.alert("Authentication Error", "No access token found. Please log in.");
+        return;
+      }
+
+      setLoading(true);
 
       const update = await axios.put(
         `https://taskmanager-backend-214z.onrender.com/api/v1/tasks/${id}`,
@@ -66,27 +88,42 @@ const TaskDetailScreen = () => {
         }
       );
 
-      if(update.data.success){
-        fetchTask()
+      if (update.data.success) {
+        fetchTask();
+        Alert.alert("Success", "Task updated successfully!");
+        setIsEditing(false);
       }
-
-      Alert.alert("Success", "Task updated successfully!");
-      setIsEditing(false);
     } catch (error) {
       console.error("Error updating task:", error);
       Alert.alert("Error", "Failed to update task.");
+    } finally {
+      setLoading(false);
     }
+  };
+
+  // Handle task deletion with confirmation
+  const confirmDelete = () => {
+    Alert.alert(
+      "Confirm Deletion",
+      "Are you sure you want to delete this task? This action cannot be undone.",
+      [
+        { text: "Cancel" },
+        { text: "Delete", onPress: handleDelete, style: "destructive" }
+      ],
+      // { cancelable: true }
+    );
   };
 
   // Handle task deletion
   const handleDelete = async () => {
-    try {
-      const token = await AsyncStorage.getItem("accessToken");
-      if (!token) {
-        Alert.alert("Error", "No access token found. Please log in.");
-        return;
-      }
+    const token = await AsyncStorage.getItem("accessToken");
+    if (!token) {
+      Alert.alert("Authentication Error", "No access token found. Please log in.");
+      return;
+    }
 
+    setLoading(true);
+    try {
       await axios.delete(
         `https://taskmanager-backend-214z.onrender.com/api/v1/tasks/${id}`,
         {
@@ -101,85 +138,194 @@ const TaskDetailScreen = () => {
     } catch (error) {
       console.error("Error deleting task:", error);
       Alert.alert("Error", "Failed to delete task.");
+      setLoading(false);
     }
   };
 
+  const handleCancel = () => {
+    setIsEditing(false);
+    setUpdatedTitle(task.title);
+    setUpdatedDescription(task.description);
+  };
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Task Details</Text>
+    <View style={styles.taskContainer}>
+      {loading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large"  />
+          <Text style={styles.loadingText}>Loading task details...</Text>
+        </View>
+      ) : isEditing ? (
+        <Card >
+          <Card.Content>
+            <TextInput
+              label="Title"
+              value={updatedTitle}
+              onChangeText={setUpdatedTitle}
+              style={styles.input}
+              mode="outlined"
+              error={!updatedTitle.trim()}
+            />
+            {!updatedTitle.trim() && (
+              <Text style={styles.errorText}>Title is required</Text>
+            )}
+            <TextInput
+              label="Description"
+              value={updatedDescription}
+              onChangeText={setUpdatedDescription}
+              style={styles.input}
+              multiline
+              mode="outlined"
+              numberOfLines={4}
+            />
 
-      {isEditing ? (
-        <>
-          <TextInput
-            label="Title"
-            value={updatedTitle}
-            onChangeText={setUpdatedTitle}
-            style={styles.input}
-          />
-          <TextInput
-            label="Description"
-            value={updatedDescription}
-            onChangeText={setUpdatedDescription}
-            style={styles.input}
-            multiline
-          />
-          <Button mode="contained" onPress={handleUpdate} style={styles.button}>
-            Save Changes
-          </Button>
-        </>
+            <Card.Actions >
+              <Button
+                mode="contained"
+                onPress={handleUpdate}
+                style={styles.actionButton}
+                icon="content-save"
+                loading={loading}
+                disabled={loading || !updatedTitle.trim()}
+              >
+                Save
+              </Button>
+              <Button
+                mode="outlined"
+                onPress={handleCancel}
+                style={styles.cancelButton}
+                icon="close"
+                disabled={loading}
+              >
+                Cancel
+              </Button>
+            </Card.Actions>
+          </Card.Content>
+        </Card>
       ) : (
-        <>
-          <Text style={styles.taskTitle}>{task.title}</Text>
-          <Text style={styles.taskDescription}>{task.description}</Text>
-          <Button
-            mode="contained"
-            onPress={() => setIsEditing(true)}
-            style={styles.button}
-          >
-            Edit Task
-          </Button>
-        </>
+        <Card>
+          <Card.Content>
+            {/* <Text style={styles.dateText}>Created: {task._id}</Text> */}
+            <Text style={styles.taskTitle}>{task.title}</Text>
+            <Divider style={styles.divider} />
+            <Text style={styles.sectionTitle}>Description</Text>
+            <Text style={styles.taskDescription}>
+              {task.description || "No description provided."}
+            </Text>
+          </Card.Content>
+          <Card.Actions >
+            <Button
+              mode="contained"
+              onPress={() => setIsEditing(true)}
+              icon="pencil"
+              style={styles.editButton}
+            >
+              Edit Task
+            </Button>
+            <Button
+              mode="outlined"
+              onPress={confirmDelete}
+              icon="delete"
+              textColor={theme.colors.error}
+              style={styles.deleteButton}
+            >
+              Delete
+            </Button>
+          </Card.Actions>
+        </Card>
       )}
-
-      <Button
-        mode="outlined"
-        onPress={handleDelete}
-        style={styles.deleteButton}
-      >
-        Delete Task
-      </Button>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
+  // container: {
+  //   flex: 1,
+  //   backgroundColor: "#f5f5f5",
+  // },
+  // scrollContainer: {
+  //   padding: 16,
+  // },
+  taskContainer: {
+    padding: 15
   },
-  title: {
+  // card: {
+  //   marginBottom: 25,
+  //   borderRadius: 20,
+  // },
+  // dateText: {
+  //   fontSize: 12,
+  //   marginBottom: 8,
+  //   color: "#666",
+  // },
+  taskTitle: {
     fontSize: 24,
     fontWeight: "bold",
-    marginBottom: 20,
+    marginBottom: 16,
   },
-  taskTitle: {
-    fontSize: 20,
+  divider: {
+    marginVertical: 16,
+    height: 1,
+  },
+  sectionTitle: {
+    fontSize: 16,
     fontWeight: "bold",
-    marginBottom: 10,
+    marginBottom: 8,
+    color: "#555",
   },
   taskDescription: {
     fontSize: 16,
-    marginBottom: 20,
+    lineHeight: 24,
+    marginBottom: 16,
   },
   input: {
-    marginBottom: 15,
+    marginBottom: 16,
+    backgroundColor: "#fff",
   },
-  button: {
-    marginTop: 10,
+  errorText: {
+    color: "red",
+    marginTop: -12,
+    marginBottom: 12,
+    marginLeft: 8,
+    fontSize: 12,
+  },
+  buttonContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 8,
+  },
+  actionButton: {
+    flex: 1,
+    marginRight: 8,
+  },
+  cancelButton: {
+    flex: 1,
+    marginLeft: 8,
+  },
+  // cardActions: {
+  //   justifyContent: "space-between",
+  //   paddingHorizontal: 16,
+  //   paddingBottom: 16,
+  // },
+  editButton: {
+    flex: 1,
+    marginRight: 8,
   },
   deleteButton: {
-    marginTop: 20,
+    flex: 1,
+    marginLeft: 8,
     borderColor: "red",
+  },
+  loadingContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 24,
+    borderRadius: 12,
+    marginTop: 24,
+  },
+  loadingText: {
+    marginTop: 16,
+    fontSize: 16,
   },
 });
 
