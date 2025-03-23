@@ -1,4 +1,5 @@
 import { SIGNUP_API } from "@/api/signup";
+import { CustomButton } from "@/components/Button/CustomButton";
 import axios from "axios";
 import { router } from "expo-router";
 import React, { useState } from "react";
@@ -122,11 +123,8 @@ export default function SignupScreen() {
                 <Caption style={styles.subtitle}>Create an account to get started</Caption>
               </View>
 
-              {/* Form Fields */}
+   
               <View style={styles.formFields}>
-                {/* <View style={styles.inputRow}> */}
-                  {/* First Name Input */}
-                  {/* <View style={styles.input}> */}
                     <TextInput
                       label="First Name"
                       value={fname}
@@ -141,10 +139,9 @@ export default function SignupScreen() {
                       theme={{ roundness: 10 }}
                     />
                     {fnameError && <Text style={styles.errorText}>{fnameError}</Text>}
-                  {/* </View> */}
+           
 
                   {/* Last Name Input */}
-                  {/* <View style={styles.input}> */}
                     <TextInput
                       label="Last Name"
                       value={lname}
@@ -159,8 +156,7 @@ export default function SignupScreen() {
                       theme={{ roundness: 10 }}
                     />
                     {lnameError && <Text style={styles.errorText}>{lnameError}</Text>}
-                  {/* </View> */}
-                {/* </View> */}
+
 
                 {/* Email Input */}
                 <TextInput
@@ -205,7 +201,7 @@ export default function SignupScreen() {
                 {passwordError && <Text style={styles.errorText}>{passwordError}</Text>}
 
                 {/* Signup Button */}
-                <Button
+                <CustomButton
                   mode="contained"
                   onPress={handleSignup}
                   style={styles.button}
@@ -215,19 +211,19 @@ export default function SignupScreen() {
                   theme={{ roundness: 25 }}
                 >
                   {loading ? "Creating Account..." : "Create Account"}
-                </Button>
+                </CustomButton>
 
                 {/* Login Link */}
                 <View style={styles.loginLink}>
                   <Text style={styles.loginText}>Already have an account? </Text>
-                  <Button
+                  <CustomButton
                     mode="text"
                     onPress={goToLogin}
                     style={styles.textButton}
                     labelStyle={styles.textButtonLabel}
                   >
                     Sign In
-                  </Button>
+                  </CustomButton>
                 </View>
               </View>
             </Surface>

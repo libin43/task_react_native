@@ -5,6 +5,7 @@ import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Link, router } from "expo-router";
 import { SIGNIN_API } from "@/api/signin";
+import { CustomButton } from "@/components/Button/CustomButton";
 
 export default function Index() {
   // State for email and password
@@ -132,7 +133,7 @@ export default function Index() {
                 />
 
                 {/* Login Button */}
-                <Button
+                <CustomButton
                   mode="contained"
                   onPress={handleLogin}
                   loading={loading}
@@ -142,28 +143,28 @@ export default function Index() {
                   theme={{ roundness: 25 }}
                 >
                   {loading ? "Signing In..." : "Sign In"}
-                </Button>
+                </CustomButton>
 
                 {/* Forgot Password */}
-                <Button
+                {/* <Button
                   mode="text"
                   onPress={() => Alert.alert("Info", "Password reset feature coming soon!")}
                   style={styles.forgotPassword}
                 >
                   Forgot Password?
-                </Button>
+                </Button> */}
 
                 {/* Signup Link */}
                 <View style={styles.signupLink}>
                   <Text style={styles.signupText}>Don't have an account? </Text>
-                  <Button
+                  <CustomButton
                     mode="text"
                     onPress={goToSignup}
                     style={styles.textButton}
                     labelStyle={styles.textButtonLabel}
                   >
                     Create Account
-                  </Button>
+                  </CustomButton>
                 </View>
               </View>
             </Surface>
