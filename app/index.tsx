@@ -59,7 +59,7 @@ export default function Index() {
         router.replace("/tasks");
       }
     } catch (error) {
-        handleApiError(error)
+        handleApiError(error, 'login')
     } finally {
       setLoading(false);
     }
