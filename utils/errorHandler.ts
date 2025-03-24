@@ -5,7 +5,9 @@ import { Alert } from "react-native";
 export const handleApiError = async (error: any) => {
     console.log(error.response?.data, "error response");
 
-    const statusCode = error.response?.data?.statusCode
+    const statusCode = error.response?.status
+
+    console.log(statusCode,'statuscode')
 
     const errorCode = error.response?.data?.errorCode;
     const errorMessage = error.response?.data?.message || "An error occurred.";
