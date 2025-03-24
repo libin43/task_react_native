@@ -2,12 +2,12 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
 import { Alert } from "react-native";
 
-export const handleApiError = async (error: any) => {
+export const handleApiError = async (error: any, screen?: string) => {
     console.log(error.response?.data, "error response");
 
     const statusCode = error.response?.status
 
-    console.log(statusCode,'statuscode')
+    console.log(statusCode, 'statuscode')
 
     const errorCode = error.response?.data?.errorCode;
     const errorMessage = error.response?.data?.message || "An error occurred.";
@@ -26,7 +26,10 @@ export const handleApiError = async (error: any) => {
 
     if (statusCode === 401) {
         await AsyncStorage.removeItem("accessToken");
-        router.replace("/");
+        if (screen !== 'login') {
+
+            router.replace("/");
+        }
     }
 
     console.log(userFriendlyMessage, "friendly message");
